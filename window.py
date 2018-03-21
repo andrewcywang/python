@@ -2,7 +2,7 @@ from tkinter import *
 
 my_window = Tk()
 my_window.title('Hello World!')
-my_window.geometry('400x400')
+my_window.geometry('400x100')
 
 # 加入一個字串變數，用來控制 Label 的 textvariable
 label_var = StringVar()
