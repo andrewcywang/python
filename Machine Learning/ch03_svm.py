@@ -1,7 +1,6 @@
 from sklearn import datasets
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import Perceptron
 # 修改後的繪圖程式
 from decisionregions import plot_decision_regions
 import matplotlib.pyplot as plt
@@ -29,29 +28,25 @@ sc.fit(X_train)
 X_train_std = sc.transform(X_train)
 X_test_std = sc.transform(X_test)
 
-# Training a perceptron via scikit-learn
-# n_tier 在 0.19 版開始棄用，改用 max_iter
-ppn = Perceptron(max_iter=40, eta0=0.1, random_state=1)
-ppn.fit(X_train_std, y_train)
-
-# 測試樣本, 印出錯誤的數量
-y_pred = ppn.predict(X_test_std)
-print('Misclassified samples: %d' % (y_test != y_pred).sum())
-
-# 顯示準確率
-from sklearn.metrics import accuracy_score
-print('Accuracy: %.2f' % accuracy_score(y_test, y_pred))
-
-# Training a perceptron model using the standardized training data:
-
+# 繪圖點
 X_combined_std = np.vstack((X_train_std, X_test_std))
 y_combined = np.hstack((y_train, y_test))
 
-plot_decision_regions(X=X_combined_std, y=y_combined,
-                      classifier=ppn, test_idx=range(105, 150))
+# 演算法則
+from sklearn.svm import SVC
+
+svm = SVC(kernel='linear', C=1.0, random_state=1)
+svm.fit(X_train_std, y_train)
+
+plot_decision_regions(X_combined_std, 
+                      y_combined,
+                      classifier=svm, 
+                      test_idx=range(105, 150))
 plt.xlabel('petal length [standardized]')
 plt.ylabel('petal width [standardized]')
 plt.legend(loc='upper left')
-
 plt.tight_layout()
+#plt.savefig('images/03_11.png', dpi=300)
 plt.show()
+
+

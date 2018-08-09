@@ -1,7 +1,6 @@
 from sklearn import datasets
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import Perceptron
 # 修改後的繪圖程式
 from decisionregions import plot_decision_regions
 import matplotlib.pyplot as plt
@@ -29,29 +28,25 @@ sc.fit(X_train)
 X_train_std = sc.transform(X_train)
 X_test_std = sc.transform(X_test)
 
-# Training a perceptron via scikit-learn
-# n_tier 在 0.19 版開始棄用，改用 max_iter
-ppn = Perceptron(max_iter=40, eta0=0.1, random_state=1)
-ppn.fit(X_train_std, y_train)
-
-# 測試樣本, 印出錯誤的數量
-y_pred = ppn.predict(X_test_std)
-print('Misclassified samples: %d' % (y_test != y_pred).sum())
-
-# 顯示準確率
-from sklearn.metrics import accuracy_score
-print('Accuracy: %.2f' % accuracy_score(y_test, y_pred))
-
-# Training a perceptron model using the standardized training data:
-
-X_combined_std = np.vstack((X_train_std, X_test_std))
+# 與 Decision Tree 使用相同的 combined
+X_combined = np.vstack((X_train, X_test))
 y_combined = np.hstack((y_train, y_test))
 
-plot_decision_regions(X=X_combined_std, y=y_combined,
-                      classifier=ppn, test_idx=range(105, 150))
-plt.xlabel('petal length [standardized]')
-plt.ylabel('petal width [standardized]')
-plt.legend(loc='upper left')
+# 演算法則
+from sklearn.ensemble import RandomForestClassifier
 
+forest = RandomForestClassifier(criterion='gini',
+                                n_estimators=25, 
+                                random_state=1,
+                                n_jobs=2)
+forest.fit(X_train, y_train)
+
+plot_decision_regions(X_combined, y_combined, 
+                      classifier=forest, test_idx=range(105, 150))
+
+plt.xlabel('petal length [cm]')
+plt.ylabel('petal width [cm]')
+plt.legend(loc='upper left')
 plt.tight_layout()
+#plt.savefig('images/03_22.png', dpi=300)
 plt.show()
