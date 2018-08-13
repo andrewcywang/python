@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as pf
 import numpy as np
 import pandas as pd     # 先讀取資料 - Andrew
 from perceptron import Perceptron
@@ -18,8 +19,9 @@ plt.scatter(X[:50, 0], X[:50, 1],
 plt.scatter(X[50:100, 0], X[50:100, 1],
             color='blue', marker='x', label='versicolor')
 
-plt.xlabel('sepal length [cm]')
-plt.ylabel('petal length [cm]')
+zhfont1 = pf.FontProperties(fname='C:\Windows\Fonts\kaiu.ttf')
+plt.xlabel('花萼長度 [cm]',fontproperties=zhfont1)
+plt.ylabel('花瓣長度 [cm]',fontproperties=zhfont1)
 plt.legend(loc='upper left')
 plt.show()
 # 感知器 - 建構子
@@ -33,7 +35,7 @@ plt.ylabel('Number of updates')
 plt.show()
 # 畫出結果區域
 plot_decision_regions(X, y, classifier=ppn)
-plt.xlabel('sepal length [cm]')
-plt.ylabel('petal length [cm]')
+plt.xlabel('花萼長度 [公分]',fontproperties=zhfont1)
+plt.ylabel('花瓣長度 [公分]',fontproperties=zhfont1)
 plt.legend(loc='upper left')
 plt.show()
