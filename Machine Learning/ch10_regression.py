@@ -37,3 +37,15 @@ plt.ylabel('Price in $1000s [MEDV]')
 
 #plt.savefig('images/10_07.png', dpi=300)
 plt.show()
+
+# 另一種方法
+# adding a column vector of "ones"
+Xb = np.hstack((np.ones((X.shape[0], 1)), X))
+w = np.zeros(X.shape[1])
+z = np.linalg.inv(np.dot(Xb.T, Xb))
+w = np.dot(z, np.dot(Xb.T, y))
+
+print('adding a column vector of "ones"')
+print('Slope: %.3f' % w[1])
+print('Intercept: %.3f' % w[0])
+print('測試w_:', w)

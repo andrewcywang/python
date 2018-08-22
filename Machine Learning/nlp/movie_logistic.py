@@ -1,63 +1,71 @@
-import pyprind
 import pandas as pd
 import os
 
-pbar = pyprind.ProgBar(50000)
-
 df = pd.read_csv('movie_data.csv', encoding='utf-8')
-# df.head(3)
+print('列印前後各五行')
+print(df.head())
+print(df.tail())
 
-from nltk.stem.porter import PorterStemmer
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
 
-porter = PorterStemmer()
+# dataframe 轉 array
+#X_train = df.loc[:25000, 'review'].values
+#y_train = df.loc[:25000, 'sentiment'].values
+#X_test = df.loc[25000:, 'review'].values
+#y_test = df.loc[25000:, 'sentiment'].values
+X_train = df.loc[:25, 'review'].values
+y_train = df.loc[:25, 'sentiment'].values
+X_test = df.loc[49925:, 'review'].values
+y_test = df.loc[49925:, 'sentiment'].values
 
-def tokenizer(text):
-    return text.split()
+docs = X_train[:2]
+print('顯示前兩個字串')
+print(docs)
 
+print('先建立詞袋模型，再將字詞轉成特徵向量')
+count = CountVectorizer()
+bag = count.fit_transform(docs)
 
-def tokenizer_porter(text):
-    return [porter.stem(word) for word in text.split()]
+print('詞袋模型中產生', len(count.vocabulary_), '組辭彙')
+print(count.vocabulary_)
+print('特徵向量')
+print(bag.toarray())
 
+from sklearn.feature_extraction.text import TfidfTransformer
 
-# In[10]:
+print('列印詞頻:')
+np.set_printoptions(precision=2)
+tfidf = TfidfTransformer(use_idf=True, 
+                         norm='l2', 
+                         smooth_idf=True)
+print(tfidf.fit_transform(count.fit_transform(docs))
+      .toarray())
 
-
-tokenizer('runners like running and thus they run')
-
-
-# In[11]:
-
-
-tokenizer_porter('runners like running and thus they run')
-
-import nltk
-
-nltk.download('stopwords')
-
-
-# In[13]:
-
-
-from nltk.corpus import stopwords
-
-stop = stopwords.words('english')
-[w for w in tokenizer_porter('a runner likes running and runs a lot')[-10:]
-if w not in stop]
-
-X_train = df.loc[:25000, 'review'].values
-y_train = df.loc[:25000, 'sentiment'].values
-X_test = df.loc[25000:, 'review'].values
-y_test = df.loc[25000:, 'sentiment'].values
-
-
-# In[25]:
-
-
+# Logistic Learning
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 
+# Stop words
+import nltk
+nltk.download('stopwords')
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+
+# Token
+from nltk.stem.porter import PorterStemmer
+porter = PorterStemmer()
+
+def tokenizer(text):
+    return text.split()
+
+def tokenizer_porter(text):
+    return [porter.stem(word) for word in text.split()]
+
+#Learning
 tfidf = TfidfVectorizer(strip_accents=None,
                         lowercase=False,
                         preprocessor=None)
@@ -84,24 +92,11 @@ gs_lr_tfidf = GridSearchCV(lr_tfidf, param_grid,
                            cv=5,
                            verbose=1,
                            n_jobs=-1)
-
-#if 'TRAVIS' in os.environ:
-#    gs_lr_tfidf.verbose=2
-#    X_train = df.loc[:250, 'review'].values
-#    y_train = df.loc[:250, 'sentiment'].values
-#    X_test = df.loc[25000:25250, 'review'].values
-#    y_test = df.loc[25000:25250, 'sentiment'].values
-
-# In[26]:
-
+# 時間很長，無法結束
 gs_lr_tfidf.fit(X_train, y_train)
-
-# In[27]:
 
 print('Best parameter set: %s ' % gs_lr_tfidf.best_params_)
 print('CV Accuracy: %.3f' % gs_lr_tfidf.best_score_)
-
-# In[28]:
 
 clf = gs_lr_tfidf.best_estimator_
 print('Test Accuracy: %.3f' % clf.score(X_test, y_test))
